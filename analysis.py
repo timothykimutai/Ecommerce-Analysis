@@ -75,10 +75,9 @@ def build_rfm(df: pd.DataFrame) -> pd.DataFrame:
         "TotalRevenue": "Monetary"
     }, inplace=True)
     
-    # Quintile scoring: lower recency = better
+    # quintile scoring
     rfm["R_Score"] = pd.qcut(rfm["Recency"], 5, labels=[5, 4, 3, 2, 1]).astype(int)
     
-    # Rank-based to handle ties
     rfm["F_Score"] = pd.cut(
         rfm["Frequency"].rank(pct=True), 
         bins=[0, 0.2, 0.4, 0.6, 0.8, 1.0], 
