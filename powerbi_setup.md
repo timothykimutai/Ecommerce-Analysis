@@ -1,91 +1,103 @@
 # Power BI Setup Guide
 
-## Data Sources (Remote Access)
-You can connect Power BI directly to the raw files on GitHub. This allows you to build reports without keeping the files local.
+## 📊 Business Glossary & Logic
+Before setting up the dashboard, align on these business definitions to ensure stakeholder clarity:
 
-**1. `online_retail_cleaned.parquet` (Sales Fact)**
+| Technical Term | Business Term | Definition |
+|----------------|---------------|------------|
+| `Recency` | **Days Since Last Purchase** | Number of days since the customer's most recent transaction. |
+| `Frequency` | **Lifetime Orders** | Total count of unique orders placed by the customer. |
+| `Monetary` | **Lifetime Revenue** | Total value of all purchases made by the customer (£). |
+| `Churn Rate` | **Customer Attrition Risk** | Percentage of high-value customers showing signs of inactivity. |
+| `InvoiceNo` | **Order ID** | Unique identifier for a single transaction. |
+
+---
+
+## Data Sources (Remote Access)
+Connect directly to these GitHub raw files using the **Web** connector in Power BI.
+
+**1. Sales Transactions (Fact)**
+   - **Business Use**: analyzing revenue, volume, and product performance.
    - URL: `https://github.com/timothykimutai/Ecommerce-Analysis/raw/main/output/online_retail_cleaned.parquet`
 
-**2. `rfm_table.parquet` (Dimension)**
+**2. Customer Segments (Dimension)**
+   - **Business Use**: Filtering by customer value tiers (Champions vs. At-Risk).
    - URL: `https://github.com/timothykimutai/Ecommerce-Analysis/raw/main/output/rfm_table.parquet`
 
-**3. `online_retail_returns.parquet` (Returns Fact)**
+**3. Returns Data (Fact)**
+   - **Business Use**: Tracking product quality issues and negative friction.
    - URL: `https://github.com/timothykimutai/Ecommerce-Analysis/raw/main/output/online_retail_returns.parquet`
 
-**4. `date_dimension.parquet` (Date Dimension)**
+**4. Calendar (Dimension)**
+   - **Business Use**: Time-intelligence analysis (MoM, YoY).
    - URL: `https://github.com/timothykimutai/Ecommerce-Analysis/raw/main/output/date_dimension.parquet`
+
+---
 
 ## Data Model Setup
 
-1. **Get Data**:
-   - Select **Web** connector.
-   - Excel/CSV/Parquet connectors usually require a local path. For remote parquet, use **Web** and paste the URLs above.
-   - *Note: If Power BI doesn't natively support "Parquet from Web" easily, you might need a small Power Query script or download them locally.*
+1. **Load Data**: Use the **Web** connector for the URLs above.
+2. **Rename Tables** (Optional but Recommended):
+   - `online_retail_cleaned` -> **Sales**
+   - `rfm_table` -> **Customers**
+   - `online_retail_returns` -> **Returns**
+   - `date_dimension` -> **Calendar**
+3. **Relationships**:
+   - Link **Sales[CustomerID]** to **Customers[CustomerID]** (Many-to-One).
+   - Link **Returns[CustomerID]** to **Customers[CustomerID]** (Many-to-One).
+   - Link **Sales[InvoiceDate]** to **Calendar[Date]** (Many-to-One).
 
-   **Power Query Script (M) for Web Parquet**:
-   ```powerquery
-   let
-       Source = Parquet.Document(Web.Contents("https://github.com/timothykimutai/Ecommerce-Analysis/raw/main/output/rfm_table.parquet"))
-   in
-       Source
-   ```
-
-2. **Relationships**:
-   - Create a relationship between `online_retail_cleaned` and `rfm_table` using **`CustomerID`**.
-   - Cardinality: **Many-to-One** (* (Sales) -> 1 (Customers)).
-   - Cross-filter direction: **Single**.
-
-3. **Measures to Create**:
-   - `Total Revenue = SUM(online_retail_cleaned[TotalRevenue])`
-   - `Active Customers = DISTINCTCOUNT(online_retail_cleaned[CustomerID])`
-   - `Avg Order Value = AVERAGE(online_retail_cleaned[TotalRevenue])`
-   - `Return Rate = DIVIDE(COUNT(online_retail_returns[InvoiceNo]), COUNT(online_retail_cleaned[InvoiceNo]))`
+---
 
 ## Page 1: The Executive Pulse (Implementation)
 
-### 1. Data Prep (New)
-I have generated a `date_dimension.parquet` file for you. Import this and link `Date` column to `online_retail_cleaned[InvoiceDate]`. This allows for accurate "Prior Period" calculations.
+### Required Measures (DAX)
+*Use these business-friendly names for your measures:*
 
-### 2. Required Measures (DAX)
-Create a new measure table or add these to your Sales table:
-
-**A. Core KPIs**
+**A. Core Business KPIs**
 ```dax
-Total Revenue = SUM(online_retail_cleaned[TotalRevenue])
-Total Customers = DISTINCTCOUNT(online_retail_cleaned[CustomerID])
-AOV = DIVIDE([Total Revenue], COUNT(online_retail_cleaned[InvoiceNo]))
-churn_risk_count = CALCULATE(COUNT(rfm_table[CustomerID]), rfm_table[Segment] = "At-Risk")
-Churn Rate % = DIVIDE([churn_risk_count], COUNTROWS(rfm_table))
+Total Revenue = SUM(Sales[TotalRevenue])
+Total Orders = DISTINCTCOUNT(Sales[InvoiceNo])
+Active Customer Base = DISTINCTCOUNT(Sales[CustomerID])
+Avg Order Value (AOV) = DIVIDE([Total Revenue], [Total Orders])
 ```
 
-**B. Time Intelligence (Revenue vs Prior Period)**
+**B. Risk & Retention Metrics**
 ```dax
-Revenue PM = CALCULATE([Total Revenue], DATEADD('date_dimension'[Date], -1, MONTH))
-Revenue Trend = IF([Revenue PM] = 0, BLANK(), DIVIDE([Total Revenue] - [Revenue PM], [Revenue PM]))
+High Risk Customers = CALCULATE(COUNT(Customers[CustomerID]), Customers[Segment] = "At-Risk")
+Attrition Risk % = DIVIDE([High Risk Customers], COUNTROWS(Customers))
+Product Return Rate = DIVIDE(COUNT(Returns[InvoiceNo]), [Total Orders])
 ```
 
-### 3. Visuals Configuration
+**C. Growth Indicators (MoM)**
+```dax
+Revenue Last Month = CALCULATE([Total Revenue], DATEADD('Calendar'[Date], -1, MONTH))
+Monthly Growth % = IF([Revenue Last Month] = 0, BLANK(), DIVIDE([Total Revenue] - [Revenue Last Month], [Revenue Last Month]))
+```
 
-**KPI Cards**
-- Card 1: `Total Revenue` (Callout value), `Revenue Trend` (Trend axis or subtitle)
-- Card 2: `Total Customers`
-- Card 3: `AOV`
-- Card 4: `Churn Rate %` (Format as percentage, maybe turn red if > 20%)
+---
 
-**Trend Chart (Line Chart)**
-- **X-Axis**: `date_dimension[MonthName]` (Sort by Month Number)
-- **Y-Axis**: `Total Revenue`
-- **Analytics Pane**: Add a "Trend Line"
+### Visuals Configuration
 
-**Geographic Pulse (Map)**
-- **Location**: `online_retail_cleaned[Country]`
-- **Bubble Size**: `Total Revenue`
+**1. The "North Star" Cards (Top Row)**
+   - **Revenue Health**: `Total Revenue` (with `Monthly Growth %` as callout).
+   - **Customer Base**: `Active Customer Base`.
+   - **Order Value**: `Avg Order Value (AOV)`.
+   - **Retention Warning**: `Attrition Risk %` (Color red if > 20%).
 
-**Segment Breakdown (Treemap)**
-- **Category**: `rfm_table[Segment]`
-- **Values**: `Total Revenue` (to show value ownership) or `Total Customers` (to show population size)
+**2. Revenue Trend (Line Chart)**
+   - **Title**: "Revenue Performance Year-to-Date"
+   - **X-Axis**: `Calendar[MonthName]`
+   - **Y-Axis**: `Total Revenue`
+   - **Add-on**: Add a **Trend Line** from the Analytics pane to show trajectory.
 
-## Visualization Ideas
-- **Segment Overview**: Bar chart of `Total Revenue` by `Segment`.
-- **Churn Risk**: Pie chart of customer counts by `Segment`.
-- **Geographic Impact**: Map using `Country` and `Total Revenue`.
+**3. Global Performance (Map)**
+   - **Title**: "Revenue by Market"
+   - **Location**: `Sales[Country]`
+   - **Bubble Size**: `Total Revenue`
+
+**4. Portfolio Health (Treemap)**
+   - **Title**: "Revenue Contribution by Segment"
+   - **Category**: `Customers[Segment]`
+   - **Values**: `Total Revenue`
+   - *Insight: Quickly see if "Champions" are driving the majority of revenue.*
