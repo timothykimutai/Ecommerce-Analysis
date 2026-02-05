@@ -13,6 +13,33 @@ Before setting up the dashboard, align on these business definitions to ensure s
 
 ---
 
+## 🎨 Design System & Color Palette
+Use these hex codes to ensure a professional, consistent "Modern Ecommerce" aesthetic.
+
+### 1. Brand Colors
+| Role | Color | Hex Code | Usage |
+|------|-------|----------|-------|
+| **Primary** | **Midnight Blue** | `#2C3E50` | Headers, KPI Cards, Main Titles |
+| **Secondary** | **Ocean Teal** | `#1ABC9C` | Positive Trends, "Active Customer" Metrics |
+| **Accent** | **Vibrant Coral** | `#FF6B6B` | Call-to-Actions, Highlighting Key Data |
+
+### 2. Semantic Colors (Status Indicators)
+| Role | Color | Hex Code | Usage |
+|------|-------|----------|-------|
+| **Success / Good** | **Emerald Green** | `#2ECC71` | Growth, Profit, "Champions" Segment |
+| **Warning / Risk** | **Amber Orange** | `#F39C12` | "At-Risk" Segment, Slowing Trends |
+| **Danger / Bad** | **Alizarin Red** | `#E74C3C` | Churn, Returns, Negative Growth |
+| **Neutral** | **Slate Grey** | `#95A5A6` | Contextual text, Axis labels, Comparison lines |
+
+### 3. Typography Guidelines
+* **Font Family**: standard sans-serif (e.g., DIN, Segoe UI).
+* **Size Hierarchy**:
+    * **KPI Values**: 45pt (Bold)
+    * **KPI Labels**: 12pt (Regular, Grey)
+    * **Chart Titles**: 14pt (Semi-Bold)
+
+---
+
 ## Data Sources (Remote Access)
 Connect directly to these GitHub raw files using the **Web** connector in Power BI.
 
@@ -80,10 +107,10 @@ Monthly Growth % = IF([Revenue Last Month] = 0, BLANK(), DIVIDE([Total Revenue] 
 ### Visuals Configuration
 
 **1. The "North Star" Cards (Top Row)**
-   - **Revenue Health**: `Total Revenue` (with `Monthly Growth %` as callout).
-   - **Customer Base**: `Active Customer Base`.
-   - **Order Value**: `Avg Order Value (AOV)`.
-   - **Retention Warning**: `Attrition Risk %` (Color red if > 20%).
+   - **Revenue** (was Total Revenue): Total sales volume. *Goal: Growth.*
+   - **Customers** (was Active Customer Base): Unique active buyers. *Goal: Reach.*
+   - **AOV** (was Avg Order Value): Average spend per order. *Goal: Efficiency.*
+   - **Risk** (was Attrition Risk): % of customers in "At-Risk" segment. *Goal: Minimization.*
 
 **2. Revenue Trend (Line Chart)**
    - **Title**: "Revenue Performance Year-to-Date"
