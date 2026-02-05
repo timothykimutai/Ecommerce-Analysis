@@ -118,13 +118,17 @@ Monthly Growth % = IF([Revenue Last Month] = 0, BLANK(), DIVIDE([Total Revenue] 
    - **Y-Axis**: `Total Revenue`
    - **Add-on**: Add a **Trend Line** from the Analytics pane to show trajectory.
 
-**3. Global Performance (Map)**
-   - **Title**: "Revenue by Market"
-   - **Location**: `Sales[Country]`
-   - **Bubble Size**: `Total Revenue`
-
-**4. Portfolio Health (Treemap)**
-   - **Title**: "Revenue Contribution by Segment"
-   - **Category**: `Customers[Segment]`
+**3. Revenue Share (Donut Chart)**
+   - **Title**: "Revenue Mix by Segment"
+   - **Legend**: `Customers[Segment]`
    - **Values**: `Total Revenue`
-   - *Insight: Quickly see if "Champions" are driving the majority of revenue.*
+   - *Insight: Visualizes the reliance on "Champions" vs "At-Risk".*
+
+**4. Market Performance (Table)**
+   - **Title**: "Top Markets Breakdown"
+   - **Columns**:
+     - `Sales[Country]`
+     - `Total Revenue` (Data Bar conditional formatting)
+     - `Total Orders`
+     - `Avg Order Value (AOV)`
+   - *Insight: detailed look at where the money is coming from.*
