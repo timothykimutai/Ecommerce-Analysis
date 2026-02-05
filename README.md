@@ -17,16 +17,12 @@ RFM analysis and customer segmentation for ecommerce data with automated root-ca
 - Python 3.9+
 - pip
 
-### Installation
-
-```bash
 # Clone the repository
-git clone <your-repo-url>
-cd Ecommerce
+git clone https://github.com/timothykimutai/Ecommerce-Analysis.git
+cd Ecommerce-Analysis
 
 # Install dependencies
 pip install -e ".[dev]"
-```
 
 ### Usage
 
