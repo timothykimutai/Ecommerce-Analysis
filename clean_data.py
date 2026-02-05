@@ -39,7 +39,8 @@ def process_data(path: Path) -> Tuple[pd.DataFrame, pd.DataFrame]:
     
     df["InvoiceNo"] = df["InvoiceNo"].astype(str)
     df["StockCode"] = df["StockCode"].astype(str)
-    df["InvoiceDate"] = pd.to_datetime(df["InvoiceDate"], errors="coerce")
+    # Ensure InvoiceDate is normalized to midnight (Date only) for Power BI relationships
+    df["InvoiceDate"] = pd.to_datetime(df["InvoiceDate"], errors="coerce").dt.normalize()
     df["Country"] = df["Country"].astype("category")
 
     is_return = df["InvoiceNo"].str.startswith("C", na=False)
@@ -57,7 +58,24 @@ def process_data(path: Path) -> Tuple[pd.DataFrame, pd.DataFrame]:
         raise
 
     logger.info(f"Processed {len(sales)} sales, {len(returns)} returns")
+    logger.info(f"Processed {len(sales)} sales, {len(returns)} returns")
     return sales, returns
+
+
+def create_date_dimension(start_date: pd.Timestamp, end_date: pd.Timestamp) -> pd.DataFrame:
+    """Create a calendar dimension table for time-series analysis"""
+    dates = pd.date_range(start=start_date, end=end_date, freq="D")
+    date_df = pd.DataFrame({"Date": dates})
+    
+    date_df["Year"] = date_df["Date"].dt.year
+    date_df["Quarter"] = date_df["Date"].dt.quarter
+    date_df["Month"] = date_df["Date"].dt.month
+    date_df["MonthName"] = date_df["Date"].dt.month_name()
+    date_df["Week"] = date_df["Date"].dt.isocalendar().week.astype(int)
+    date_df["DayOfWeek"] = date_df["Date"].dt.dayofweek
+    date_df["DayName"] = date_df["Date"].dt.day_name()
+    
+    return date_df
 
 
 def main():
@@ -68,6 +86,13 @@ def main():
         
         sales.to_parquet(OUTPUT_DIR / "online_retail_cleaned.parquet", compression="snappy", index=False)
         returns.to_parquet(OUTPUT_DIR / "online_retail_returns.parquet", compression="snappy", index=False)
+        
+        # Create and save Date Dimension
+        min_date = sales["InvoiceDate"].min()
+        max_date = sales["InvoiceDate"].max()
+        date_dim = create_date_dimension(min_date, max_date)
+        date_dim.to_parquet(OUTPUT_DIR / "date_dimension.parquet", compression="snappy", index=False)
+
         
         logger.info(f"Data saved to {OUTPUT_DIR}")
         

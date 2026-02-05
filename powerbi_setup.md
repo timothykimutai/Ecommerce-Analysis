@@ -113,8 +113,8 @@ Monthly Growth % = IF([Revenue Last Month] = 0, BLANK(), DIVIDE([Total Revenue] 
    - **Risk** (was Attrition Risk): % of customers in "At-Risk" segment. *Goal: Minimization.*
 
 **2. Revenue Trend (Line Chart)**
-   - **Title**: "Revenue Performance Year-to-Date"
-   - **X-Axis**: `Calendar[MonthName]`
+   - **Title**: "Revenue Performance Over Time"
+   - **X-Axis**: `Calendar[Date]` (Use the Date Hierarchy: Year > Month)
    - **Y-Axis**: `Total Revenue`
    - **Add-on**: Add a **Trend Line** from the Analytics pane to show trajectory.
 
