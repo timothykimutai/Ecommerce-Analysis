@@ -132,3 +132,111 @@ Monthly Growth % = IF([Revenue Last Month] = 0, BLANK(), DIVIDE([Total Revenue] 
      - `Total Orders`
      - `Avg Order Value (AOV)`
    - *Insight: detailed look at where the money is coming from.*
+
+## Page 2: Customer Behavioral DNA (The "Who")
+*Goal: Deep dive into the RFM segments.*
+
+### Visuals Configuration
+
+**1. The RFM Grid (Scatter Plot)**
+   - **Title**: "Customer Value Matrix"
+   - **X-Axis**: `Customers[Recency]` (Days Since Last Purchase) — *Invert axis if possible (or understand right = more inactive).*
+   - **Y-Axis**: `Customers[Frequency]` (Lifetime Orders)
+   - **Legend**: `Customers[Segment]`
+   - **Size**: `Customers[Monetary]`
+   - **Tip**: This visually separates your clusters. Champions will be high-frequency, high-monetary.
+
+**2. Segment Longevity (Bar Chart)**
+   - **Title**: "Average Inactivity by Segment"
+   - **Y-Axis**: `Customers[Segment]`
+   - **X-Axis**: `Average of Recency`
+   - *Insight: Who is drifting away the fastest?*
+
+**3. Product Preference (Matrix/Table)**
+   - **Title**: "Top Products by Segment"
+   - **Rows**: `Sales[Description]`
+   - **Columns**: `Customers[Segment]`
+   - **Values**: `Total Revenue`
+   - **Filter**: Filter visual to "Top 10 Products" by Revenue.
+   - *Cross-filtering: Clicking a segment in the Scatter Plot should filter this list to show what THAT group buys.*
+
+## Page 3: Risk & Recovery (The "Action")
+*Goal: Root-cause justification + Exportable list for Marketing.*
+
+### Visuals Configuration
+
+### Visuals Configuration
+
+**1. The "Loyalty Funnel" (High-End Visual)**
+   *Goal: A professional, stage-based view of customer progression.*
+   
+   **A. Data Setup (Create a new Manual Table)**
+   - Name: `Funnel_Stages`
+   - Columns: `ID` (1,2,3), `Stage` ("Acquired", "Retained", "Devoted")
+
+   **B. Measures (DAX)**
+   ```dax
+   Funnel_Count = SWITCH(SELECTEDVALUE('Funnel_Stages'[ID]),
+       1, COUNTROWS(Customers),                            // Acquired (Total)
+       2, CALCULATE(COUNTROWS(Customers), Customers[Frequency] > 1), // Retained (Repeat)
+       3, CALCULATE(COUNTROWS(Customers), Customers[Segment] = "Champion") // Devoted
+   )
+
+   Conversion % = DIVIDE([Funnel_Count], CALCULATE([Funnel_Count], ALL('Funnel_Stages'), 'Funnel_Stages'[ID] = 1))
+   Funnel_Label_Pct = FORMAT([Conversion %], "0%")
+   ```
+
+   **C. Visual Build (100% Stacked Bar Chart)**
+   - **Y-Axis**: `Funnel_Stages[Stage]`
+   - **X-Axis**: `Funnel_Count`
+   - **Styling**:
+     - *Bars*: Set distinct colors for each stage (Grey -> Teal -> Dark Blue).
+     - *Data Labels*: **On** (Position: Inside Center). Use `Funnel_Label_Pct`.
+     - *Clean Up*: Turn off X-Axis, Legend, and Gridlines for that "clean" look.
+
+**2. Return Rate Analysis (Bar Chart)**
+   - **Title**: "Return Rate by Product (Quality Check)"
+   - **Y-Axis**: `Sales[Description]` (Product)
+   - **X-Axis**: `Product Return Rate` (Measure)
+   - **Filter**: Top N Products by `Return Rate` (e.g., Top 10 worst offenders).
+   - **Color**: Conditional formatting (Red if > 15%).
+   - *Insight: If a top-selling item has a 20% return rate, THAT is why they left.*
+
+**3. The "Win-Back" Table (Table)**
+   - **Title**: "At-Risk Target List (Export for Email)"
+   - **Columns**:
+     - `Customers[CustomerID]`
+     - `Customers[Recency]` (Days Inactive)
+     - `Sales[Description]` (Last Purchased Product - *implicit via cross-filter*)
+     - `Customers[Monetary]` (LTV to prioritize high-value targets)
+   - **Filter (Visual Level)**: Filter `Customers[Segment]` to **"At-Risk"** ONLY.
+   - *Action: Marketing team can right-click -> Export Data -> Upload to Email Tool.*
+
+## Page 3: Risk & Recovery (The "Action")
+*Goal: Root-cause justification + Exportable list for Marketing.*
+
+### Visuals Configuration
+
+**1. The "Leakage" Funnel (Funnel Chart)**
+   - **Title**: "Customer Lifecycle Purgatory"
+   - **Category**: `Customers[Segment]`
+   - **Values**: `Count of CustomerID`
+   - *Story*: Show counts from Champion -> Standard -> At-Risk. The drop-off is your "Leakage".
+
+**2. Return Rate Analysis (Bar Chart)**
+   - **Title**: "Return Rate by Product (Quality Check)"
+   - **Y-Axis**: `Sales[Description]` (Product)
+   - **X-Axis**: `Product Return Rate` (Measure)
+   - **Filter**: Top N Products by `Return Rate` (e.g., Top 10 worst offenders).
+   - **Color**: Conditional formatting (Red if > 15%).
+   - *Insight: If a top-selling item has a 20% return rate, THAT is why they left.*
+
+**3. The "Win-Back" Table (Table)**
+   - **Title**: "At-Risk Target List (Export for Email)"
+   - **Columns**:
+     - `Customers[CustomerID]`
+     - `Customers[Recency]` (Days Inactive)
+     - `Sales[Description]` (Last Purchased Product - *implicit via cross-filter*)
+     - `Customers[Monetary]` (LTV to prioritize high-value targets)
+   - **Filter (Visual Level)**: Filter `Customers[Segment]` to **"At-Risk"** ONLY.
+   - *Action: Marketing team can right-click -> Export Data -> Upload to Email Tool.*
