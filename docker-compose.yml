@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  analytics:
+    build: .
+    container_name: ecommerce-analytics
+    volumes:
+      - ./output:/app/output
+      - ./Online Retail.xlsx:/app/Online Retail.xlsx:ro
+    environment:
+      - LOG_LEVEL=INFO
+    command: python analysis.py
+
+  etl:
+    build: .
+    container_name: ecommerce-etl
+    volumes:
+      - ./output:/app/output
+      - ./Online Retail.xlsx:/app/Online Retail.xlsx:ro
+    environment:
+      - LOG_LEVEL=INFO
+    command: python clean_data.py

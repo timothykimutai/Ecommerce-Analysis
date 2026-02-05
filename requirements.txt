@@ -1,0 +1,12 @@
+# Production dependencies
+pandas
+pandera
+openpyxl
+pyarrow
+
+# Development dependencies
+pytest
+pytest-cov
+ruff
+mypy
+black
