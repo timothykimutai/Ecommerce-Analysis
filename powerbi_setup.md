@@ -78,6 +78,8 @@ Connect directly to these GitHub raw files using the **Web** connector in Power 
 
 ## Page 1: The Executive Pulse (Implementation)
 
+![Executive Pulse Screenshot](reports/assets/executive_pulse.png)
+
 ### Required Measures (DAX)
 *Use these business-friendly names for your measures:*
 
@@ -136,6 +138,8 @@ Monthly Growth % = IF([Revenue Last Month] = 0, BLANK(), DIVIDE([Total Revenue] 
 ## Page 2: Customer Behavioral DNA (The "Who")
 *Goal: Deep dive into the RFM segments.*
 
+![Customer Behavioral DNA Screenshot](reports/assets/customer_behavior.png)
+
 ### Visuals Configuration
 
 **1. The RFM Grid (Scatter Plot)**
@@ -165,10 +169,8 @@ Monthly Growth % = IF([Revenue Last Month] = 0, BLANK(), DIVIDE([Total Revenue] 
 
 ### Visuals Configuration
 
-### Visuals Configuration
-
-**1. The "Loyalty Funnel" (High-End Visual)**
-   *Goal: A professional, stage-based view of customer progression.*
+**1. Customer Loyalty Stages (100% Stacked Bar)**
+   *Goal: A professional view of customer retention and growth.*
    
    **A. Data Setup (Create a new Manual Table)**
    - Name: `Funnel_Stages`
@@ -186,42 +188,14 @@ Monthly Growth % = IF([Revenue Last Month] = 0, BLANK(), DIVIDE([Total Revenue] 
    Funnel_Label_Pct = FORMAT([Conversion %], "0%")
    ```
 
-   **C. Visual Build (100% Stacked Bar Chart)**
+   **C. Visual Build**
+   - **Type**: 100% Stacked Bar Chart.
    - **Y-Axis**: `Funnel_Stages[Stage]`
    - **X-Axis**: `Funnel_Count`
    - **Styling**:
      - *Bars*: Set distinct colors for each stage (Grey -> Teal -> Dark Blue).
      - *Data Labels*: **On** (Position: Inside Center). Use `Funnel_Label_Pct`.
-     - *Clean Up*: Turn off X-Axis, Legend, and Gridlines for that "clean" look.
-
-**2. Return Rate Analysis (Bar Chart)**
-   - **Title**: "Return Rate by Product (Quality Check)"
-   - **Y-Axis**: `Sales[Description]` (Product)
-   - **X-Axis**: `Product Return Rate` (Measure)
-   - **Filter**: Top N Products by `Return Rate` (e.g., Top 10 worst offenders).
-   - **Color**: Conditional formatting (Red if > 15%).
-   - *Insight: If a top-selling item has a 20% return rate, THAT is why they left.*
-
-**3. The "Win-Back" Table (Table)**
-   - **Title**: "At-Risk Target List (Export for Email)"
-   - **Columns**:
-     - `Customers[CustomerID]`
-     - `Customers[Recency]` (Days Inactive)
-     - `Sales[Description]` (Last Purchased Product - *implicit via cross-filter*)
-     - `Customers[Monetary]` (LTV to prioritize high-value targets)
-   - **Filter (Visual Level)**: Filter `Customers[Segment]` to **"At-Risk"** ONLY.
-   - *Action: Marketing team can right-click -> Export Data -> Upload to Email Tool.*
-
-## Page 3: Risk & Recovery (The "Action")
-*Goal: Root-cause justification + Exportable list for Marketing.*
-
-### Visuals Configuration
-
-**1. The "Leakage" Funnel (Funnel Chart)**
-   - **Title**: "Customer Lifecycle Purgatory"
-   - **Category**: `Customers[Segment]`
-   - **Values**: `Count of CustomerID`
-   - *Story*: Show counts from Champion -> Standard -> At-Risk. The drop-off is your "Leakage".
+     - *Clean Up*: Turn off X-Axis, Legend, and Gridlines for a clean UI look.
 
 **2. Return Rate Analysis (Bar Chart)**
    - **Title**: "Return Rate by Product (Quality Check)"

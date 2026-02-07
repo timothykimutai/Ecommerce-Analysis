@@ -22,6 +22,14 @@ From the analysis of 4,338 customers:
 - **17.89% vs 2.07%** item return rate gap (At-Risk vs Champions) - indicating quality/fulfillment issues
 - **£616,000** projected revenue impact from recommended interventions
 
+### 📊 Dashboard Visuals
+
+#### Page 1: Executive Pulse
+![Executive Pulse](reports/assets/executive_pulse.png)
+
+#### Page 2: Customer Behavioral DNA
+![Customer Behavioral DNA](reports/assets/customer_behavior.png)
+
 ## ✨ Features
 
 - **Automated ETL Pipeline**: Schema-validated data cleaning with Pandera
